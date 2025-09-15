@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { Navigation } from '@/components/navigation';
-import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { Providers } from '@/components/providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,14 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50`}>
-        <ErrorBoundary>
-          <Navigation />
-          <main className="container mx-auto px-4 py-8 animate-fadeIn">
-            <ErrorBoundary>
-              {children}
-            </ErrorBoundary>
-          </main>
-        </ErrorBoundary>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

@@ -1,16 +1,26 @@
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+'use client';
+
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { ArrowRight, Users, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 
-export default async function HomePage() {
-  const session = await getServerSession(authOptions);
-  
+export default function HomePage() {
+  const { data: session } = useSession();
+
   if (!session) {
-    redirect('/auth/signin');
+    return (
+      <div className="max-w-4xl mx-auto text-center">
+        <h1 className="text-4xl font-bold mb-6">🏠 Buyer Lead Intake</h1>
+        <p className="text-xl text-gray-600 mb-8">
+          Streamline your real estate business with our powerful lead management platform
+        </p>
+        <Link href="/auth/signin" className="btn btn-primary">
+          Get Started
+        </Link>
+      </div>
+    );
   }
-  
+
   return (
     <div className="max-w-6xl mx-auto">
       {/* Hero Section */}
