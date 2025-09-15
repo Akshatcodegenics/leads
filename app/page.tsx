@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import Link from 'next/link';
+import { ArrowRight, Users, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);

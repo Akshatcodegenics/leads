@@ -24,10 +24,12 @@ interface BuyersPageProps {
   };
 }
 
-export default async function BuyersPage({ searchParams }: BuyersPageProps) {
+export default async function BuyersPage({
+  searchParams,
+}: BuyersPageProps) {
   const session = await getServerSession(authOptions);
   
-  if (!session) {
+  if (!session?.user?.email) {
     redirect('/auth/signin');
   }
 

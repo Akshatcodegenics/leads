@@ -2,19 +2,24 @@ import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
-      id: 'demo',
       name: 'Demo Login',
-      credentials: {},
-      async authorize() {
-        // Return demo user for development
-        return {
-          id: '550e8400-e29b-41d4-a716-446655440000',
-          email: 'demo@example.com',
-          name: 'Demo User',
-          role: 'admin',
-        };
+      credentials: {
+        email: { label: 'Email', type: 'email', placeholder: 'demo@example.com' },
+      },
+      async authorize(credentials) {
+        // Demo mode - accept any email
+        if (credentials?.email) {
+          return {
+            id: '550e8400-e29b-41d4-a716-446655440000',
+            email: credentials.email,
+            name: 'Demo User',
+            role: 'user',
+          };
+        }
+        return null;
       },
     }),
   ],
