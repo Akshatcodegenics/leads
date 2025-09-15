@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { BuyerService } from '@/lib/services/buyer';
-import { csvBuyerSchema } from '@/lib/validations/buyer';
+import { csvBuyerSchema, CreateBuyerData } from '@/lib/validations/buyer';
 import { parse } from 'csv-parse/sync';
 import { z } from 'zod';
 
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     for (const validatedData of validatedRecords) {
       try {
-        const buyer = await BuyerService.createBuyer(validatedData, session.user.email);
+        const buyer = await BuyerService.createBuyer(validatedData as CreateBuyerData, session.user.email);
         results.push(buyer);
       } catch (error) {
         errors.push({

@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       sortOrder: searchParams.get('sortOrder') || 'desc',
     });
 
-    const result = await BuyerService.getBuyers(filters, session.user.id);
+    const result = await BuyerService.getBuyers(filters, session.user.email);
     return NextResponse.json(result);
   } catch (error) {
     console.error('GET /api/buyers error:', error);

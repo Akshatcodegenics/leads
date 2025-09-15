@@ -23,7 +23,7 @@ export default async function BuyerPage({ params }: BuyerPageProps) {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <BuyerDetails buyer={buyer} currentUser={session.user} />
+      <BuyerDetails buyer={buyer} currentUser={{ email: session.user.email!, role: session.user.role }} />
     </div>
   );
 }

@@ -117,7 +117,7 @@ export function BuyersList({ buyers }: BuyersListProps) {
                 <StatusQuickActions
                   buyerId={buyer.id}
                   currentStatus={buyer.status}
-                  canEdit={buyer.ownerId === session?.user?.id || session?.user?.role === 'admin'}
+                  canEdit={buyer.ownerId === session?.user?.email || session?.user?.role === 'admin'}
                 />
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

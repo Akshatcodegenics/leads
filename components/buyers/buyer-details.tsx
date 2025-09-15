@@ -13,13 +13,13 @@ interface BuyerWithHistory extends Buyer {
 
 interface BuyerDetailsProps {
   buyer: BuyerWithHistory;
-  currentUser: { id: string; role?: string };
+  currentUser: { email: string; role?: string };
 }
 
 export function BuyerDetails({ buyer, currentUser }: BuyerDetailsProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const canEdit = buyer.ownerId === currentUser.id || currentUser.role === 'admin';
+  const canEdit = buyer.ownerId === currentUser.email || currentUser.role === 'admin';
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this buyer? This action cannot be undone.')) {

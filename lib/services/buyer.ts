@@ -238,6 +238,6 @@ export class BuyerService {
 
   // Update buyer status (quick action)
   static async updateBuyerStatus(id: string, status: string, userId: string) {
-    return this.updateBuyer(id, { id, status }, userId);
+    return this.updateBuyer(id, { id, status: status as any }, userId);
   }
 }

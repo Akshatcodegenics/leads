@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, integer, timestamp, json, pgEnum, pgPrimaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, integer, timestamp, json, pgEnum, primaryKey } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Enums
@@ -78,7 +78,7 @@ export const verificationTokens = pgTable('verificationTokens', {
   token: varchar('token', { length: 255 }).notNull(),
   expires: timestamp('expires', { mode: 'date' }).notNull(),
 }, (vt) => ({
-  compoundKey: pgPrimaryKey({ columns: [vt.identifier, vt.token] }),
+  compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
 }));
 
 // Types

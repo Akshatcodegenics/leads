@@ -45,7 +45,7 @@ export default async function BuyersPage({ searchParams }: BuyersPageProps) {
   });
 
   // Fetch buyers data
-  const userId = session.user.email;
+  const userId = session.user.email!;
   const { buyers, pagination } = await BuyerService.getBuyers(filters, userId);
 
   return (
