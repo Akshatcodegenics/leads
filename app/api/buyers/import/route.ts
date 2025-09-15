@@ -72,13 +72,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Import valid records
-    const validatedData = validatedRecords[0];
-    const buyer = await BuyerService.createBuyer(validatedData, session.user.email);
+    const results = [];
+    const errors = [];
+
+    for (const validatedData of validatedRecords) {
+      try {
+        const buyer = await BuyerService.createBuyer(validatedData, session.user.email);
+        results.push(buyer);
+      } catch (error) {
+        errors.push({
+          data: validatedData,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      imported: 1,
-      details: { buyer }
+      imported: results.length,
+      failed: errors.length,
+      totalRows: records.length,
       details: { results, errors }
     });
 
