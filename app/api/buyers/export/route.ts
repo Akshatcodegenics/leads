@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       sortOrder: searchParams.get('sortOrder') || 'desc',
     });
 
-    const { buyers } = await BuyerService.getBuyers(filters, session.user.id);
+    const { buyers } = await BuyerService.getBuyers(filters, session.user.email);
 
     // Transform buyers data for CSV export
     const csvData = buyers.map(buyer => ({
