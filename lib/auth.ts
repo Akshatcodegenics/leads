@@ -26,10 +26,12 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (session?.user) {
-        session.user.id = token.sub!;
-        session.user.role = token.role as string;
-      }
+      session.user = {
+        name: token.name,
+        email: token.email,
+        image: token.picture,
+        role: token.role as string || 'user',
+      };
       return session;
     },
   },

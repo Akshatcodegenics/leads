@@ -9,7 +9,7 @@ import { z } from 'zod';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -41,14 +41,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
     const data = createBuyerSchema.parse(body);
 
-    const buyer = await BuyerService.createBuyer(data, session.user.id);
+    const buyer = await BuyerService.createBuyer(data, session.user.email);
     return NextResponse.json(buyer, { status: 201 });
   } catch (error) {
     console.error('POST /api/buyers error:', error);

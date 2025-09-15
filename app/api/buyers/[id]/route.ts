@@ -12,7 +12,7 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -35,7 +35,7 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -48,11 +48,11 @@ export async function PUT(
       return NextResponse.json({ error: 'Buyer not found' }, { status: 404 });
     }
 
-    if (existingBuyer.ownerId !== session.user.id && session.user.role !== 'admin') {
+    if (existingBuyer.ownerId !== session.user.email && session.user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized to edit this buyer' }, { status: 403 });
     }
 
-    const buyer = await BuyerService.updateBuyer(params.id, data, session.user.id);
+    const buyer = await BuyerService.updateBuyer(params.id, data, session.user.email);
     return NextResponse.json(buyer);
   } catch (error) {
     console.error('PUT /api/buyers/[id] error:', error);
@@ -73,11 +73,11 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await BuyerService.deleteBuyer(params.id, session.user.id, session.user.role || 'user');
+    await BuyerService.deleteBuyer(params.id, session.user.email, session.user.role || 'user');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('DELETE /api/buyers/[id] error:', error);

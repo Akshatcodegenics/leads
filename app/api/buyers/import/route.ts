@@ -10,7 +10,7 @@ import { z } from 'zod';
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -72,15 +72,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Import valid records
-    const { results, errors } = await BuyerService.bulkCreateBuyers(
-      validatedRecords,
-      session.user.id
-    );
+    const validatedData = validatedRecords[0];
+    const buyer = await BuyerService.createBuyer(validatedData, session.user.email);
 
     return NextResponse.json({
       success: true,
-      imported: results.length,
-      errors: errors.length,
+      imported: 1,
+      details: { buyer }
       details: { results, errors }
     });
 

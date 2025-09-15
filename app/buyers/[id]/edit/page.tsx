@@ -22,7 +22,7 @@ export default async function EditBuyerPage({ params }: EditBuyerPageProps) {
   }
 
   // Check permissions
-  if (buyer.ownerId !== session.user.id && session.user.role !== 'admin') {
+  if (buyer.ownerId !== session.user.email && session.user.role !== 'admin') {
     redirect('/buyers');
   }
 

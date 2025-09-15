@@ -12,7 +12,7 @@ export async function PATCH(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -25,11 +25,11 @@ export async function PATCH(
       return NextResponse.json({ error: 'Buyer not found' }, { status: 404 });
     }
 
-    if (existingBuyer.ownerId !== session.user.id && session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized to edit this buyer' }, { status: 403 });
+    if (existingBuyer.ownerId !== session.user.email && session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized to update this buyer' }, { status: 403 });
     }
 
-    const buyer = await BuyerService.updateBuyerStatus(params.id, status, session.user.id);
+    const buyer = await BuyerService.updateBuyerStatus(params.id, status, session.user.email);
     return NextResponse.json(buyer);
   } catch (error) {
     console.error('PATCH /api/buyers/[id]/status error:', error);
