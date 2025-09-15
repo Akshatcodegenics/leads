@@ -1,54 +1,71 @@
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { BuyerService } from '@/lib/services/buyer';
-import { buyerFiltersSchema } from '@/lib/validations/buyer';
+'use client';
+
+import { useSession } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { BuyersList } from '@/components/buyers/buyers-list';
 import { BuyersFilters } from '@/components/buyers/buyers-filters';
 import { BuyersPagination } from '@/components/buyers/buyers-pagination';
 import { ExportBuyersButton } from '@/components/buyers/export-buyers-button';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 
-interface BuyersPageProps {
-  searchParams: {
-    search?: string;
-    city?: string;
-    propertyType?: string;
-    status?: string;
-    timeline?: string;
-    page?: string;
-    limit?: string;
-    sortBy?: string;
-    sortOrder?: string;
-  };
-}
+export default function BuyersPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [buyers, setBuyers] = useState([]);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, totalPages: 0, pages: 0 });
+  const [loading, setLoading] = useState(true);
 
-export default async function BuyersPage({
-  searchParams,
-}: BuyersPageProps) {
-  const session = await getServerSession(authOptions);
-  
-  if (!session?.user?.email) {
-    redirect('/auth/signin');
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin');
+      return;
+    }
+
+    if (status === 'authenticated' && session?.user?.email) {
+      fetchBuyers();
+    }
+  }, [status, session, searchParams]);
+
+  const fetchBuyers = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams(searchParams.toString());
+      const response = await fetch(`/api/buyers?${params}`);
+      if (response.ok) {
+        const data = await response.json();
+        setBuyers(data.buyers);
+        setPagination(data.pagination);
+      }
+    } catch (error) {
+      console.error('Error fetching buyers:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (status === 'loading' || loading) {
+    return <LoadingSpinner />;
   }
 
-  // Parse and validate filters
-  const filters = buyerFiltersSchema.parse({
-    search: searchParams.search || undefined,
-    city: searchParams.city || undefined,
-    propertyType: searchParams.propertyType || undefined,
-    status: searchParams.status || undefined,
-    timeline: searchParams.timeline || undefined,
-    page: searchParams.page ? parseInt(searchParams.page) : 1,
-    limit: searchParams.limit ? parseInt(searchParams.limit) : 10,
-    sortBy: searchParams.sortBy || 'updatedAt',
-    sortOrder: searchParams.sortOrder || 'desc',
-  });
+  if (status === 'unauthenticated') {
+    return null;
+  }
 
-  // Fetch buyers data
-  const userId = session.user.email!;
-  const { buyers, pagination } = await BuyerService.getBuyers(filters, userId);
+  const currentFilters = {
+    search: searchParams.get('search') || undefined,
+    city: searchParams.get('city') as any || undefined,
+    propertyType: searchParams.get('propertyType') as any || undefined,
+    status: searchParams.get('status') as any || undefined,
+    timeline: searchParams.get('timeline') as any || undefined,
+    page: searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1,
+    limit: searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10,
+    sortBy: (searchParams.get('sortBy') as 'updatedAt' | 'createdAt' | 'fullName') || 'updatedAt',
+    sortOrder: (searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc',
+  };
 
   return (
     <div className="space-y-6">
@@ -70,7 +87,7 @@ export default async function BuyersPage({
       </div>
 
       {/* Filters */}
-      <BuyersFilters initialFilters={filters} />
+      <BuyersFilters initialFilters={currentFilters} />
 
       {/* Results */}
       <div className="card">

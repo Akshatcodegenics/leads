@@ -1,13 +1,21 @@
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { CreateBuyerForm } from '@/components/buyers/create-buyer-form';
+'use client';
 
-export default async function NewBuyerPage() {
-  const session = await getServerSession(authOptions);
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { BuyerForm } from '@/components/forms/buyer-form';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+
+export default function NewBuyerPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   
-  if (!session) {
-    redirect('/auth/signin');
+  if (status === 'loading') {
+    return <LoadingSpinner />;
+  }
+
+  if (status === 'unauthenticated') {
+    router.push('/auth/signin');
+    return null;
   }
 
   return (
@@ -17,7 +25,20 @@ export default async function NewBuyerPage() {
         <p className="text-gray-600">Add a new buyer lead to the system</p>
       </div>
       
-      <CreateBuyerForm />
+      <BuyerForm 
+        onSubmit={async (data) => {
+          const response = await fetch('/api/buyers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+          if (response.ok) {
+            const buyer = await response.json();
+            router.push(`/buyers/${buyer.id}`);
+          }
+        }}
+        submitLabel="Create Lead"
+      />
     </div>
   );
 }

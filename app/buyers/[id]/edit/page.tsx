@@ -1,29 +1,58 @@
-import { redirect, notFound } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { BuyerService } from '@/lib/services/buyer';
-import { EditBuyerForm } from '@/components/buyers/edit-buyer-form';
+'use client';
 
-interface EditBuyerPageProps {
-  params: { id: string };
-}
+import { useSession } from 'next-auth/react';
+import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { BuyerForm } from '@/components/forms/buyer-form';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
-export default async function EditBuyerPage({ params }: EditBuyerPageProps) {
-  const session = await getServerSession(authOptions);
-  
-  if (!session) {
-    redirect('/auth/signin');
+export default function EditBuyerPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const params = useParams();
+  const [buyer, setBuyer] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin');
+      return;
+    }
+
+    if (status === 'authenticated' && session?.user?.email) {
+      fetchBuyer();
+    }
+  }, [status, session, params.id]);
+
+  const fetchBuyer = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/buyers/${params.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        // Check permissions
+        if (data.ownerId !== session?.user?.email && session?.user?.role !== 'admin') {
+          router.push('/buyers');
+          return;
+        }
+        setBuyer(data);
+      } else if (response.status === 404) {
+        router.push('/buyers');
+      }
+    } catch (error) {
+      console.error('Error fetching buyer:', error);
+      router.push('/buyers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (status === 'loading' || loading) {
+    return <LoadingSpinner />;
   }
 
-  const buyer = await BuyerService.getBuyerById(params.id);
-  
-  if (!buyer) {
-    notFound();
-  }
-
-  // Check permissions
-  if (buyer.ownerId !== session.user.email && session.user.role !== 'admin') {
-    redirect('/buyers');
+  if (status === 'unauthenticated' || !buyer) {
+    return null;
   }
 
   return (
@@ -33,7 +62,20 @@ export default async function EditBuyerPage({ params }: EditBuyerPageProps) {
         <p className="text-gray-600">Update buyer information and requirements</p>
       </div>
       
-      <EditBuyerForm buyer={buyer} />
+      <BuyerForm 
+        initialData={buyer} 
+        onSubmit={async (data) => {
+          const response = await fetch(`/api/buyers/${params.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+          if (response.ok) {
+            router.push(`/buyers/${params.id}`);
+          }
+        }}
+        submitLabel="Update Lead"
+      />
     </div>
   );
 }
